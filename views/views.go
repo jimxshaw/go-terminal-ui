@@ -1,6 +1,8 @@
 package views
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jimxshaw/go-terminal-ui/models"
 	"github.com/rivo/tview"
@@ -115,17 +117,20 @@ func addContactList(contactsList *tview.List, contacts []models.Contact) {
 }
 
 func setDetailsText(contactTextView *tview.TextView, contact *models.Contact) {
-	contactTextView.Clear()
-	details := contact.FirstName +
-		" " +
-		contact.LastName +
-		"\n" +
-		contact.Email +
-		"\n" +
-		contact.PhoneNumber +
-		"\n" +
-		contact.City +
-		"\n" +
-		contact.State
+	isBusiness := "Non-Business"
+	if contact.Business {
+		isBusiness = "Business"
+	}
+
+	details := fmt.Sprintf("%s %s\n%s\n%s\n%s\n%s\n%s %s",
+		contact.FirstName,
+		contact.LastName,
+		contact.Email,
+		contact.PhoneNumber,
+		contact.City,
+		contact.State,
+		"Status:",
+		isBusiness,
+	)
 	contactTextView.SetText(details)
 }
