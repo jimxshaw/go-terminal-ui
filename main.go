@@ -24,6 +24,13 @@ var textView = tview.NewTextView().
 	SetText("Press (q) to quit")
 
 func main() {
+	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 113 {
+			app.Stop()
+		}
+		return event
+	})
+
 	if err := app.SetRoot(textView, true).EnableMouse(true).Run(); err != nil {
 		panic(err)
 	}
