@@ -21,43 +21,38 @@ var states = []string{"AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL"
 	"NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX",
 	"UT", "VA", "VT", "WA", "WI", "WV", "WY"}
 
-var contacts []models.Contact
-
-var app = tview.NewApplication()
-
-var pages = tview.NewPages()
-
-var form = tview.NewForm()
-
-var contactsList = tview.NewList().ShowSecondaryText(false)
-
-var contactTextView = tview.NewTextView()
-
-var flex = tview.NewFlex()
-
-var textView = tview.NewTextView().
-	SetTextColor(tcell.ColorWhite).
-	SetText("(a) to add a new contact \n(q) to quit")
-
 func StartApplication() {
-	contactsList.SetSelectedFunc(func(index int, name string, secondName string, shortcut rune) {
-		setDetailsText(&contacts[index])
+	var contacts []models.Contact
+	app := tview.NewApplication()
+	pages := tview.NewPages()
+
+	form := tview.NewForm()
+	contactsListView := tview.NewList().ShowSecondaryText(false)
+	contactTextView := tview.NewTextView()
+	flex := tview.NewFlex()
+
+	contactsListView.SetSelectedFunc(func(index int, name, secondName string, shortcut rune) {
+		setDetailsText(contactTextView, &contacts[index])
 	})
 
 	flex.SetDirection(tview.FlexRow).
 		AddItem(tview.NewFlex().
-			AddItem(contactsList, 0, 1, true).
+			AddItem(contactsListView, 0, 1, true).
 			AddItem(contactTextView, 0, 4, false),
 			0, 6, false,
 		).
-		AddItem(textView, 0, 1, false)
+		AddItem(tview.NewTextView().
+			SetTextColor(tcell.ColorWhite).
+			SetText("(a) to add a new contact \n(q) to quit"),
+			0, 1, false,
+		)
 
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == quitKey {
 			app.Stop()
 		} else if event.Rune() == addKey {
 			form.Clear(true)
-			addNewContactForm()
+			addNewContactForm(form, &contacts, contactsListView, pages)
 			pages.SwitchToPage(addNewContact)
 		}
 		return event
@@ -71,8 +66,10 @@ func StartApplication() {
 	}
 }
 
-func addNewContactForm() *tview.Form {
+func addNewContactForm(form *tview.Form, contacts *[]models.Contact, contactsListView *tview.List, pages *tview.Pages) {
 	contact := models.Contact{}
+
+	form.Clear(true)
 
 	form.AddInputField("First Name", "", fieldWidth, nil, func(firstName string) {
 		contact.FirstName = firstName
@@ -103,15 +100,13 @@ func addNewContactForm() *tview.Form {
 	})
 
 	form.AddButton("Save", func() {
-		contacts = append(contacts, contact)
-		addContactList()
+		*contacts = append(*contacts, contact)
+		addContactList(contactsListView, *contacts)
 		pages.SwitchToPage(menu)
 	})
-
-	return form
 }
 
-func addContactList() {
+func addContactList(contactsList *tview.List, contacts []models.Contact) {
 	contactsList.Clear()
 
 	for index, contact := range contacts {
@@ -119,7 +114,7 @@ func addContactList() {
 	}
 }
 
-func setDetailsText(contact *models.Contact) {
+func setDetailsText(contactTextView *tview.TextView, contact *models.Contact) {
 	contactTextView.Clear()
 	details := contact.FirstName +
 		" " +
