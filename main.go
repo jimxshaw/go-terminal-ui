@@ -41,6 +41,8 @@ var form = tview.NewForm()
 
 var contactsList = tview.NewList().ShowSecondaryText(false)
 
+var contactTextView = tview.NewTextView()
+
 var flex = tview.NewFlex()
 
 var textView = tview.NewTextView().
@@ -48,8 +50,16 @@ var textView = tview.NewTextView().
 	SetText("(a) to add a new contact \n(q) to quit")
 
 func main() {
+	contactsList.SetSelectedFunc(func(index int, name string, secondName string, shortcut rune) {
+		setDetailsText(&contacts[index])
+	})
+
 	flex.SetDirection(tview.FlexRow).
-		AddItem(tview.NewFlex().AddItem(contactsList, 0, 1, true), 0, 6, false).
+		AddItem(tview.NewFlex().
+			AddItem(contactsList, 0, 1, true).
+			AddItem(contactTextView, 0, 4, false),
+			0, 6, false,
+		).
 		AddItem(textView, 0, 1, false)
 
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -117,4 +127,20 @@ func addContactList() {
 	for index, contact := range contacts {
 		contactsList.AddItem(contact.firstName+" "+contact.lastName, " ", rune(asciiNumberOne+index), nil)
 	}
+}
+
+func setDetailsText(contact *Contact) {
+	contactTextView.Clear()
+	details := contact.firstName +
+		" " +
+		contact.lastName +
+		"\n" +
+		contact.email +
+		"\n" +
+		contact.phoneNumber +
+		"\n" +
+		contact.city +
+		"\n" +
+		contact.state
+	contactTextView.SetText(details)
 }
