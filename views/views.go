@@ -1,7 +1,8 @@
-package main
+package views
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/jimxshaw/go-terminal-ui/models"
 	"github.com/rivo/tview"
 )
 
@@ -20,18 +21,7 @@ var states = []string{"AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL"
 	"NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX",
 	"UT", "VA", "VT", "WA", "WI", "WV", "WY"}
 
-// Contact represents a contact.
-type Contact struct {
-	firstName   string
-	lastName    string
-	email       string
-	phoneNumber string
-	city        string
-	state       string
-	business    bool
-}
-
-var contacts []Contact
+var contacts []models.Contact
 
 var app = tview.NewApplication()
 
@@ -49,7 +39,7 @@ var textView = tview.NewTextView().
 	SetTextColor(tcell.ColorWhite).
 	SetText("(a) to add a new contact \n(q) to quit")
 
-func main() {
+func StartApplication() {
 	contactsList.SetSelectedFunc(func(index int, name string, secondName string, shortcut rune) {
 		setDetailsText(&contacts[index])
 	})
@@ -82,34 +72,34 @@ func main() {
 }
 
 func addNewContactForm() *tview.Form {
-	contact := Contact{}
+	contact := models.Contact{}
 
 	form.AddInputField("First Name", "", fieldWidth, nil, func(firstName string) {
-		contact.firstName = firstName
+		contact.FirstName = firstName
 	})
 
 	form.AddInputField("Last Name", "", fieldWidth, nil, func(lastName string) {
-		contact.lastName = lastName
+		contact.LastName = lastName
 	})
 
 	form.AddInputField("Email", "", fieldWidth, nil, func(email string) {
-		contact.email = email
+		contact.Email = email
 	})
 
 	form.AddInputField("Phone Number", "", fieldWidth, nil, func(phoneNumber string) {
-		contact.phoneNumber = phoneNumber
+		contact.PhoneNumber = phoneNumber
 	})
 
 	form.AddInputField("City", "", fieldWidth, nil, func(city string) {
-		contact.city = city
+		contact.City = city
 	})
 
 	form.AddDropDown("State", states, 0, func(state string, index int) {
-		contact.state = state
+		contact.State = state
 	})
 
 	form.AddCheckbox("Business", false, func(business bool) {
-		contact.business = business
+		contact.Business = business
 	})
 
 	form.AddButton("Save", func() {
@@ -125,22 +115,22 @@ func addContactList() {
 	contactsList.Clear()
 
 	for index, contact := range contacts {
-		contactsList.AddItem(contact.firstName+" "+contact.lastName, " ", rune(asciiNumberOne+index), nil)
+		contactsList.AddItem(contact.FirstName+" "+contact.LastName, " ", rune(asciiNumberOne+index), nil)
 	}
 }
 
-func setDetailsText(contact *Contact) {
+func setDetailsText(contact *models.Contact) {
 	contactTextView.Clear()
-	details := contact.firstName +
+	details := contact.FirstName +
 		" " +
-		contact.lastName +
+		contact.LastName +
 		"\n" +
-		contact.email +
+		contact.Email +
 		"\n" +
-		contact.phoneNumber +
+		contact.PhoneNumber +
 		"\n" +
-		contact.city +
+		contact.City +
 		"\n" +
-		contact.state
+		contact.State
 	contactTextView.SetText(details)
 }
